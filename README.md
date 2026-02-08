@@ -43,5 +43,3 @@ Como este projeto utiliza tecnologias web padrão e CDNs, não é necessário in
     * Basta clicar duas vezes no arquivo `index.html` para abrir no seu navegador padrão.
     * Ou, se usar o VS Code, utilize a extensão "Live Server".
 
-## 📂 Estrutura de Arquivos
-
