@@ -198,7 +198,7 @@ function updateTimerDisplay() {
     const minutes = Math.floor(State.timeLeft / 60);
     const seconds = State.timeLeft % 60;
     elems.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    document.title = `${elems.timerDisplay.textContent} - Pomodoro Zen`;
+    document.title = `${elems.timerDisplay.textContent} - Pomodoro Br`;
 }
 
 // Alterna entre tema claro e escuro
