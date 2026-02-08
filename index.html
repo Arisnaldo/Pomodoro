@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Br</title>
+
+    <!-- Suppress Tailwind CDN Warning (Visual Only) -->
+    <script>
+        const originalWarn = console.warn;
+        console.warn = (...args) => {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+            originalWarn.apply(console, args);
+        };
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-500">
+
+    <div id="app"
+        class="min-h-screen transition-colors duration-500 flex flex-col items-center relative overflow-hidden bg-white dark:bg-slate-900">
+
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')">
+        </div>
+
+        <!-- Header -->
+        <div class="w-full max-w-4xl p-6 flex flex-wrap gap-4 items-center justify-between z-10">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold">P
+                </div>
+                <span id="app-title" class="font-bold text-xl tracking-tight hidden sm:block dark:text-white">Pomodoro
+                    Br</span>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-4 ml-auto">
+
+                <!-- Theme Toggle -->
+                <button id="theme-toggle"
+                    class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-gray-500 dark:text-gray-400">
+                    <!-- Icon injected by JS -->
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col items-center justify-center w-full max-w-2xl px-4 z-10 -mt-4 sm:-mt-8">
+            <!-- Mode Switcher -->
+            <div
+                class="flex flex-wrap justify-center gap-2 mb-6 bg-gray-100 dark:bg-slate-800 p-1.5 rounded-xl sm:rounded-full">
+                <button id="mode-work" onclick="setMode('WORK')"
+                    class="px-4 sm:px-6 py-2 rounded-lg sm:rounded-full text-sm font-medium transition-all duration-300 bg-white dark:bg-slate-700 shadow-sm text-brand-600 dark:text-white">Foco</button>
+                <button id="mode-short" onclick="setMode('SHORT_BREAK')"
+                    class="px-4 sm:px-6 py-2 rounded-lg sm:rounded-full text-sm font-medium transition-all duration-300 text-gray-500 dark:text-gray-400">Curta</button>
+                <button id="mode-long" onclick="setMode('LONG_BREAK')"
+                    class="px-4 sm:px-6 py-2 rounded-lg sm:rounded-full text-sm font-medium transition-all duration-300 text-gray-500 dark:text-gray-400">Longa</button>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="flex flex-col items-center justify-center py-4 sm:py-6">
+                <div id="mode-label"
+                    class="text-xs sm:text-sm uppercase tracking-[0.2em] font-bold mb-2 text-brand-600 dark:text-brand-500">
+                    Tempo de Foco
+                </div>
+                <div id="timer-display"
+                    class="text-[5rem] sm:text-[8rem] md:text-[10rem] leading-none font-bold tracking-tighter tabular-nums font-mono text-gray-900 dark:text-white select-none transition-all duration-300">
+                    25:00
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-6 mt-6">
+                <button id="play-btn" class="group relative">
+                    <div
+                        class="absolute inset-0 bg-brand-400 blur-xl opacity-30 group-hover:opacity-50 transition-opacity rounded-full">
+                    </div>
+                    <div
+                        class="relative w-16 h-16 sm:w-20 sm:h-20 bg-brand-600 hover:bg-brand-500 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
+                        <i id="play-icon" data-lucide="play" class="w-6 h-6 sm:w-8 sm:h-8 ml-1"></i>
+                        <i id="pause-icon" data-lucide="pause" class="w-6 h-6 sm:w-8 sm:h-8 hidden"></i>
+                    </div>
+                </button>
+
+                <button id="reset-btn"
+                    class="p-3 sm:p-4 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-slate-600 transition-all custom-shadow hover:scale-105 active:scale-95"
+                    title="Reset Timer">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+                </button>
+            </div>
+
+            <!-- Quick Settings -->
+            <div
+                class="mt-8 w-full max-w-sm bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
+                <h3
+                    class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 text-center">
+                    Configurar Tempos (min)</h3>
+                <div class="grid grid-cols-3 gap-3 sm:gap-4">
+                    <div class="flex flex-col items-center">
+                        <label class="text-[10px] sm:text-xs font-semibold text-brand-600 mb-1">FOCO</label>
+                        <input type="number" id="input-work" value="25" min="1" max="90" onchange="updateCustomTimes()"
+                            class="w-full text-center bg-transparent border-b-2 border-brand-200 focus:border-brand-500 text-lg sm:text-xl font-bold p-1 focus:outline-none dark:text-white transition-colors">
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label class="text-[10px] sm:text-xs font-semibold text-emerald-500 mb-1">CURTA</label>
+                        <input type="number" id="input-short" value="5" min="1" max="30" onchange="updateCustomTimes()"
+                            class="w-full text-center bg-transparent border-b-2 border-emerald-200 focus:border-emerald-500 text-lg sm:text-xl font-bold p-1 focus:outline-none dark:text-white transition-colors">
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label class="text-[10px] sm:text-xs font-semibold text-indigo-500 mb-1">LONGA</label>
+                        <input type="number" id="input-long" value="15" min="1" max="60" onchange="updateCustomTimes()"
+                            class="w-full text-center bg-transparent border-b-2 border-indigo-200 focus:border-indigo-500 text-lg sm:text-xl font-bold p-1 focus:outline-none dark:text-white transition-colors">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div id="footer-text"
+            class="w-full text-center py-4 text-xs sm:text-sm text-gray-400 dark:text-gray-600 z-10 transition-all">
+            Mantenha o foco e a produtividade.
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
